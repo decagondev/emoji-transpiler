@@ -86,18 +86,15 @@ const emojiToJS = {
 
         // Handle function declarations
         if (tokens[0] === "🍕") {
-            if (tokens[2] === "👉") {
-                const funcName = tokens[1];
-                // Check if there are parameters between parentheses
-                const openParenIndex = tokens.indexOf("(");
-                const closeParenIndex = tokens.indexOf(")");
-                if (openParenIndex !== -1 && closeParenIndex !== -1) {
-                    const params = tokens.slice(openParenIndex + 1, closeParenIndex).join(", ");
-                    return `function ${funcName}(${params}) {`;
-                }
-                return `function ${funcName}() {`;
+            const funcName = tokens[1];
+            // Look for parameters between parentheses, handling both spaced and non-spaced cases
+            const fullLine = tokens.join(" ");
+            const paramMatch = fullLine.match(/\((.*?)\)/);
+            if (paramMatch) {
+                const params = paramMatch[1].trim();
+                return `function ${funcName}(${params}) {`;
             }
-            return `function ${tokens[1]}() {`;
+            return `function ${funcName}() {`;
         }
 
         // Handle if statements
@@ -138,12 +135,36 @@ const emojiToJS = {
             return `requestAnimationFrame(${tokens[1]})`;
         }
 
+        // Handle while statements
+        if (tokens[0] === "🔁") {
+            const braceIndex = tokens.indexOf("{");
+            let condition;
+            
+            if (braceIndex !== -1) {
+                condition = tokens.slice(1, braceIndex)
+                    .map(token => emojiToJS[token] || token)
+                    .join(" ");
+            } else {
+                condition = tokens.slice(1)
+                    .map(token => {
+                        // Handle special cases for comparison operators and variables
+                        const replacement = emojiToJS[token];
+                        return replacement || token;
+                    })
+                    .filter(token => token !== "{") // Remove any stray braces
+                    .join(" ");
+            }
+            
+            return `while (${condition}) {`;
+        }
+
         // Handle variable updates with operators
         if (tokens.includes("=")) {
             const varName = tokens[0];
             const rightSide = tokens.slice(2)
                 .map(token => {
                     const replacement = emojiToJS[token];
+                    // Handle special cases for operators
                     if (replacement) {
                         return replacement;
                     }
@@ -178,12 +199,84 @@ const emojiToJS = {
     });
 
     // Join lines and clean up
-    return processedLines
-        .join(";\n")
-        .replace(/;+/g, ";")
-        .replace(/;(\s*})/g, "$1")
-        .replace(/;(\s*)$/g, "")
-        .replace(/\{\s*;/g, "{"); // Remove semicolon after opening brace
+    const minifiedCode = processedLines
+        .join("\n")
+        .replace(/\s+/g, " ")  // Normalize whitespace to single spaces
+        .trim();
+
+    // Prettify the code
+    return prettifyJS(minifiedCode);
+  }
+  
+  // Helper function to prettify JavaScript code
+  function prettifyJS(code) {
+    let indent = 0;
+    let result = '';
+    let inString = false;
+    let lastChar = '';
+
+    // Helper to add newline and indent
+    const addNewline = () => {
+        result += '\n' + '    '.repeat(indent);
+    };
+
+    for (let i = 0; i < code.length; i++) {
+        const char = code[i];
+        
+        // Handle strings
+        if ((char === '"' || char === "'") && lastChar !== '\\') {
+            inString = !inString;
+        }
+        
+        if (!inString) {
+            // Handle braces and parentheses
+            if (char === '{') {
+                result += ' {';
+                indent++;
+                addNewline();
+                continue;
+            }
+            if (char === '}') {
+                indent--;
+                addNewline();
+                result += '}';
+                if (i < code.length - 1 && code[i + 1] !== ';' && code[i + 1] !== ')') {
+                    addNewline();
+                }
+                continue;
+            }
+            
+            // Add spaces around operators
+            if ('+-*/%=&|<>!'.includes(char)) {
+                if (lastChar !== ' ' && !'+-*/%=&|<>!'.includes(lastChar)) {
+                    result += ' ';
+                }
+                result += char;
+                if (i < code.length - 1 && !'+-*/%=&|<>!'.includes(code[i + 1])) {
+                    result += ' ';
+                }
+                continue;
+            }
+
+            // Add newline after semicolons
+            if (char === ';') {
+                result += char;
+                addNewline();
+                continue;
+            }
+
+            // Add space after keywords
+            if (i > 0 && /[a-z]/i.test(lastChar) && char === '(') {
+                result += ' ';
+            }
+        }
+
+        // Add character to result
+        result += char;
+        lastChar = char;
+    }
+
+    return result;
   }
   
   module.exports = { transpileEmojiToJS };

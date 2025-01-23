@@ -1,10 +1,11 @@
 {
   "name": "emoji-transpiler",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A transpiler that converts emoji-based source code to JavaScript.",
   "main": "index.js",
   "scripts": {
     "test": "node test/example.js",
+    "test:jest": "jest",
     "start": "node index.js",
     "dev": "nodemon test/example.js"
   },
@@ -21,6 +22,7 @@
   "author": "Tom Tarpey",
   "license": "MIT",
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^2.0.22"
   }
 }
