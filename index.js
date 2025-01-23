@@ -156,6 +156,13 @@ const emojiToJS = {
             return `console.log(${args})`;
         }
 
+        // Handle variable declarations
+        if (tokens[0] === "📦") {  // const
+            const varName = tokens[1];
+            const value = tokens.slice(2).join(" ");
+            return `const ${varName} = ${value}`;
+        }
+
         // Replace emoji tokens first
         const processedTokens = tokens.map(token => emojiToJS[token] || token);
         return processedTokens.join(" ");
