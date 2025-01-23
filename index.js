@@ -87,7 +87,15 @@ const emojiToJS = {
         // Handle function declarations
         if (tokens[0] === "🍕") {
             if (tokens[2] === "👉") {
-                return `function ${tokens[1]}() {`;
+                const funcName = tokens[1];
+                // Check if there are parameters between parentheses
+                const openParenIndex = tokens.indexOf("(");
+                const closeParenIndex = tokens.indexOf(")");
+                if (openParenIndex !== -1 && closeParenIndex !== -1) {
+                    const params = tokens.slice(openParenIndex + 1, closeParenIndex).join(", ");
+                    return `function ${funcName}(${params}) {`;
+                }
+                return `function ${funcName}() {`;
             }
             return `function ${tokens[1]}() {`;
         }
