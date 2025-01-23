@@ -159,7 +159,8 @@ const emojiToJS = {
         // Handle variable declarations
         if (tokens[0] === "📦") {  // const
             const varName = tokens[1];
-            const value = tokens.slice(2).join(" ");
+            const valueTokens = tokens.slice(2).map(token => emojiToJS[token] || token);
+            const value = valueTokens.join(" ");
             return `const ${varName} = ${value}`;
         }
 

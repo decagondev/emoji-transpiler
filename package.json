@@ -1,6 +1,6 @@
 {
   "name": "emoji-transpiler",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A transpiler that converts emoji-based source code to JavaScript.",
   "main": "index.js",
   "scripts": {
