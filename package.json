@@ -1,6 +1,6 @@
 {
   "name": "emoji-transpiler",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A transpiler that converts emoji-based source code to JavaScript.",
   "main": "index.js",
   "scripts": {
@@ -14,6 +14,10 @@
     "javascript",
     "fun"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/decagondev/emoji-transpiler.git"
+  },
   "author": "Tom Tarpey",
   "license": "MIT",
   "devDependencies": {

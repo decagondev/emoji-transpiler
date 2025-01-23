@@ -150,6 +150,12 @@ const emojiToJS = {
             return "}";
         }
 
+        // Handle console.log
+        if (tokens[0] === "❤️") {
+            const args = tokens.slice(1).join(", ");
+            return `console.log(${args})`;
+        }
+
         // Replace emoji tokens first
         const processedTokens = tokens.map(token => emojiToJS[token] || token);
         return processedTokens.join(" ");
